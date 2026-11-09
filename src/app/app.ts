@@ -10,10 +10,9 @@ import View from 'ol/View';
 import { defaults as defaultControls } from 'ol/control';
 import { Stroke, Style } from 'ol/style';
 import { RoutingService } from './routing.service';
+import { CarpoolRoute, RoutesService } from './routes.service';
 
 const netherlands = [3.31497, 50.803721, 7.092053, 53.510403];
-const amsterdam: [number, number] = [4.895168, 52.370216];
-const rotterdam: [number, number] = [4.47917, 51.9225];
 
 @Component({
   imports: [],
@@ -23,6 +22,7 @@ const rotterdam: [number, number] = [4.47917, 51.9225];
 })
 export class App implements OnInit {
   private readonly routingService = inject(RoutingService);
+  private readonly routesService = inject(RoutesService);
 
   private routeLayer!: VectorLayer;
   private map!: Map;
@@ -30,9 +30,6 @@ export class App implements OnInit {
   async ngOnInit() {
     this.routeLayer = new VectorLayer({
       source: new VectorSource(),
-      style: new Style({
-        stroke: new Stroke({ color: '#1a73e8', width: 4 }),
-      }),
     });
     this.map = new Map({
       view: new View(),
@@ -50,17 +47,26 @@ export class App implements OnInit {
       .getView()
       .fit(transformExtent(netherlands, 'EPSG:4326', 'EPSG:3857'));
 
-    await this.showRoute(amsterdam, rotterdam);
+    const routes = await this.routesService.getRoutes();
+    await Promise.all(routes.map(route => this.showRoute(route)));
   }
 
-  private async showRoute(from: [number, number], to: [number, number]) {
+  private async showRoute({ from, to, color }: CarpoolRoute) {
     const geometry = await this.routingService.getDrivingRoute(from, to);
 
-    const routeFeature = new GeoJSON().readFeature(geometry, {
+    const result = new GeoJSON().readFeature(geometry, {
       dataProjection: 'EPSG:4326',
       featureProjection: 'EPSG:3857',
     });
+    const routeFeatures = Array.isArray(result) ? result : [result];
 
-    this.routeLayer.getSource()?.addFeature(routeFeature);
+    const style = new Style({
+      stroke: new Stroke({ color, width: 4 }),
+    });
+    for (const routeFeature of routeFeatures) {
+      routeFeature.setStyle(style);
+    }
+
+    this.routeLayer.getSource()?.addFeatures(routeFeatures);
   }
 }
