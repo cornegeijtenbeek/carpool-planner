@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "serve": "json-server db.json"
   },
   "private": true,
   "packageManager": "npm@11.19.1",
@@ -28,6 +29,7 @@
     "@tailwindcss/postcss": "^4.1.12",
     "@types/geojson": "^7946.0.16",
     "jsdom": "^30.0.0",
+    "json-server": "^1.0.0-beta.15",
     "postcss": "^8.5.3",
     "prettier": "^3.8.1",
     "tailwindcss": "^4.1.12",
