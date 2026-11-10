@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 
 export interface CarpoolRoute {
   id: string;
+  name: string;
   from: [number, number];
   to: [number, number];
   color: string;
