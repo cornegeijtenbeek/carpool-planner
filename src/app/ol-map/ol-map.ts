@@ -1,19 +1,16 @@
 import { Component, inject, type OnInit } from '@angular/core';
-import Feature from 'ol/Feature';
-import GeoJSON from 'ol/format/GeoJSON';
-import Point from 'ol/geom/Point';
 import TileLayer from 'ol/layer/Tile';
-import VectorLayer from 'ol/layer/Vector';
 import Map from 'ol/Map';
-import { asArray } from 'ol/color';
-import { fromLonLat, transformExtent } from 'ol/proj';
-import VectorSource from 'ol/source/Vector';
+import { transformExtent } from 'ol/proj';
 import XYZ from 'ol/source/XYZ';
 import View from 'ol/View';
 import { defaults as defaultControls } from 'ol/control';
-import { Circle, Fill, Stroke, Style, Text } from 'ol/style';
-import { RoutingService } from '../routing.service';
-import { type CarpoolRoute, RoutesService } from '../routes.service';
+import { RoutingService } from '../routes/routing.service';
+import { MembersService } from '../members/members.service';
+import type { Member } from '../members/member.interface';
+import { RouteLayer } from '../routes/route-layer';
+import { Coordinate } from 'ol/coordinate';
+import { createEndMarker } from '../routes/markers';
 
 const netherlands = [3.31497, 50.803721, 7.092053, 53.510403];
 
@@ -24,16 +21,13 @@ const netherlands = [3.31497, 50.803721, 7.092053, 53.510403];
   template: '<div id="ol-map" class="map-container"></div>',
 })
 export class OlMap implements OnInit {
+  private readonly memberService = inject(MembersService);
   private readonly routingService = inject(RoutingService);
-  private readonly routesService = inject(RoutesService);
+  private readonly routeLayer = new RouteLayer();
 
-  private routeLayer!: VectorLayer;
   private map!: Map;
 
   async ngOnInit() {
-    this.routeLayer = new VectorLayer({
-      source: new VectorSource(),
-    });
     this.map = new Map({
       view: new View(),
       layers: [
@@ -52,47 +46,17 @@ export class OlMap implements OnInit {
       .getView()
       .fit(transformExtent(netherlands, 'EPSG:4326', 'EPSG:3857'));
 
-    const routes = await this.routesService.getRoutes();
-    await Promise.all(routes.map((route, index) => this.showRoute(route, index)));
+    const destination = [5.1839064, 51.5451171];
+    const members = await this.memberService.get();
+
+    await Promise.all(members.map((member) => this.addRouteForMember(member, destination)))
+
+    this.routeLayer.getSource()?.addFeature(createEndMarker(destination))
   }
 
-  private async showRoute({ name, from, to, color }: CarpoolRoute, index: number) {
-    const geometry = await this.routingService.getDrivingRoute(from, to);
+  private async addRouteForMember(member: Member, destination: Coordinate) {
+    const result = await this.routingService.getDrivingRoute(member.coordinate, destination)
 
-    const result = new GeoJSON().readFeature(geometry, {
-      dataProjection: 'EPSG:4326',
-      featureProjection: 'EPSG:3857',
-    });
-    const routeFeatures = Array.isArray(result) ? result : [result];
-
-    const routeColor = asArray(color).slice();
-    routeColor[3] = 0.5;
-
-    const style = new Style({
-      stroke: new Stroke({ color: routeColor, width: 4 }),
-    });
-    for (const routeFeature of routeFeatures) {
-      routeFeature.setStyle(style);
-    }
-
-    const startMarker = new Feature({ geometry: new Point(fromLonLat(from)) });
-    startMarker.setStyle(
-      new Style({
-        image: new Circle({
-          radius: 6,
-          fill: new Fill({ color }),
-          stroke: new Stroke({ color: '#fff', width: 2 }),
-        }),
-        text: new Text({
-          text: name,
-          offsetY: -14,
-          font: '12px sans-serif',
-          fill: new Fill({ color: '#000' }),
-          stroke: new Stroke({ color: '#fff', width: 3 }),
-        }),
-      }),
-    );
-
-    this.routeLayer.getSource()?.addFeatures([...routeFeatures, startMarker]);
+    this.routeLayer.add(member, result)
   }
 }
