@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { OlMap } from './ol-map/ol-map';
+import { Map } from './map/map';
 
 @Component({
-  imports: [OlMap],
+  imports: [Map],
   selector: 'app-root',
   styleUrl: './app.css',
-  template: '<ol-map></ol-map>',
+  template: '<app-map></app-map>',
 })
 export class App {}

@@ -1,6 +1,6 @@
 import { Component, inject, type OnInit } from '@angular/core';
 import TileLayer from 'ol/layer/Tile';
-import Map from 'ol/Map';
+import OlMap from 'ol/Map';
 import { transformExtent } from 'ol/proj';
 import XYZ from 'ol/source/XYZ';
 import View from 'ol/View';
@@ -16,19 +16,19 @@ const netherlands = [3.31497, 50.803721, 7.092053, 53.510403];
 
 @Component({
   imports: [],
-  selector: 'ol-map',
-  styleUrl: './ol-map.css',
-  template: '<div id="ol-map" class="map-container"></div>',
+  selector: 'app-map',
+  styleUrl: './map.css',
+  template: '<div id="map" class="map-container"></div>',
 })
-export class OlMap implements OnInit {
+export class Map implements OnInit {
   private readonly memberService = inject(MembersService);
   private readonly routingService = inject(RoutingService);
   private readonly routeLayer = new RouteLayer();
 
-  private map!: Map;
+  private map!: OlMap;
 
   async ngOnInit() {
-    this.map = new Map({
+    this.map = new OlMap({
       view: new View(),
       layers: [
         new TileLayer({
@@ -39,24 +39,22 @@ export class OlMap implements OnInit {
         this.routeLayer,
       ],
       controls: defaultControls({ attribution: false, rotate: false, zoom: false }),
-      target: 'ol-map'
+      target: 'map',
     });
 
-    this.map
-      .getView()
-      .fit(transformExtent(netherlands, 'EPSG:4326', 'EPSG:3857'));
+    this.map.getView().fit(transformExtent(netherlands, 'EPSG:4326', 'EPSG:3857'));
 
-    const destination = [5.1839064, 51.5451171];
+    const destination = [4.6743188, 52.5116925];
     const members = await this.memberService.get();
 
-    await Promise.all(members.map((member) => this.addRouteForMember(member, destination)))
+    await Promise.all(members.map((member) => this.addRouteForMember(member, destination)));
 
-    this.routeLayer.getSource()?.addFeature(createEndMarker(destination))
+    this.routeLayer.getSource()?.addFeature(createEndMarker(destination));
   }
 
   private async addRouteForMember(member: Member, destination: Coordinate) {
-    const result = await this.routingService.getDrivingRoute(member.coordinate, destination)
+    const result = await this.routingService.getDrivingRoute(member.coordinate, destination);
 
-    this.routeLayer.add(member, result)
+    this.routeLayer.add(member, result);
   }
 }
