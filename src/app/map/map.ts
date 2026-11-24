@@ -11,6 +11,7 @@ import type { Member } from '../members/member.interface';
 import { RouteLayer } from '../routes/route-layer';
 import { Coordinate } from 'ol/coordinate';
 import { createEndMarker } from '../routes/markers';
+import { LightGrayTileLayer } from '../layers/light-gray-tile-layer';
 
 const netherlands = [3.31497, 50.803721, 7.092053, 53.510403];
 
@@ -23,6 +24,7 @@ const netherlands = [3.31497, 50.803721, 7.092053, 53.510403];
 export class Map implements OnInit {
   private readonly memberService = inject(MembersService);
   private readonly routingService = inject(RoutingService);
+  private readonly lightGrayTileLayer = new LightGrayTileLayer();
   private readonly routeLayer = new RouteLayer();
 
   private map!: OlMap;
@@ -30,14 +32,7 @@ export class Map implements OnInit {
   async ngOnInit() {
     this.map = new OlMap({
       view: new View(),
-      layers: [
-        new TileLayer({
-          source: new XYZ({
-            url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
-          }),
-        }),
-        this.routeLayer,
-      ],
+      layers: [this.lightGrayTileLayer, this.routeLayer],
       controls: defaultControls({ attribution: false, rotate: false, zoom: false }),
       target: 'map',
     });
