@@ -42,7 +42,7 @@ export class RouteLayer extends VectorLayer {
         routeColor[3] = 0.5;
 
         const style = new Style({
-            stroke: new Stroke({ color: routeColor, width: 4 }),
+            stroke: new Stroke({ color: routeColor, width: 6 }),
         });
 
         for (const routeFeature of feature) {

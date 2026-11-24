@@ -11,14 +11,14 @@ export function createStartMarker(coordinate: Coordinate, color: string, text: s
         image: new Circle({
             radius: 6,
             fill: new Fill({ color }),
-            stroke: new Stroke({ color: '#fff', width: 2 }),
+            stroke: new Stroke({ color: '#fff', width: 1 }),
         }),
         text: new Text({
             text,
             offsetY: -14,
             font: '12px sans-serif',
             fill: new Fill({ color: '#000' }),
-            stroke: new Stroke({ color: '#fff', width: 3 }),
+            stroke: new Stroke({ color: '#fff', width: 5 }),
         }),
     }))
 
@@ -32,7 +32,7 @@ export function createEndMarker(destination: Coordinate) {
         image: new Circle({
         radius: 6,
         fill: new Fill({ color: '#000' }),
-        stroke: new Stroke({ color: '#fff', width: 2 }),
+        stroke: new Stroke({ color: '#fff', width: 1 }),
         }),
     }));
 
