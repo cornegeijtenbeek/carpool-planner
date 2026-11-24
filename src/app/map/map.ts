@@ -13,15 +13,17 @@ import { LightGrayTileLayer } from '../layers/light-gray-tile-layer';
 import { DarkGrayTileLayer } from '../layers/dark-gray-tile-layer';
 import { ThemeService } from '../theme/theme.service';
 import { ThemeToggle } from '../theme/theme-toggle';
+import { DestinationSearch } from '../search/destination-search';
 
 const netherlands = [3.31497, 50.803721, 7.092053, 53.510403];
 
 @Component({
-  imports: [ThemeToggle],
+  imports: [ThemeToggle, DestinationSearch],
   selector: 'app-map',
   styleUrl: './map.css',
   template: `
     <div id="map" class="map-container"></div>
+    <app-destination-search (search)="onSearch($event)" />
     <app-theme-toggle />
   `,
 })
@@ -53,13 +55,15 @@ export class Map implements OnInit {
     });
 
     this.map.getView().fit(transformExtent(netherlands, 'EPSG:4326', 'EPSG:3857'));
+  }
 
-    const destination = [4.6743188, 52.5116925];
+  protected async onSearch(destination: Coordinate) {
+    this.routeLayer.getSource()?.clear();
+    this.routeLayer.getSource()?.addFeature(createEndMarker(destination));
+
     const members = await this.memberService.get();
 
     await Promise.all(members.map((member) => this.addRouteForMember(member, destination)));
-
-    this.routeLayer.getSource()?.addFeature(createEndMarker(destination));
   }
 
   private async addRouteForMember(member: Member, destination: Coordinate) {
