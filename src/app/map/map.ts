@@ -72,9 +72,7 @@ export class Map implements OnInit {
 
       const members = await this.memberService.get();
 
-      await Promise.all(
-        members.map((member) => this.addRouteForMember(member, destination)),
-      );
+      await Promise.all(members.map((member) => this.addRouteForMember(member, destination)));
     } catch (error) {
       console.error('Failed to search for routes', error);
     } finally {

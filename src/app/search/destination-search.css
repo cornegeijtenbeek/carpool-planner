@@ -46,7 +46,7 @@
 }
 
 .destination-search button:disabled {
-  opacity: .5;
+  opacity: 0.5;
   border-color: #b5b5b5;
   cursor: not-allowed;
 }
