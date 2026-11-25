@@ -66,7 +66,7 @@ describe('DestinationSearch', () => {
 
   it('should not show an error for a valid "longitude, latitude" value', () => {
     // Act
-    setInputValue('4.895168, 52.370216');
+    setInputValue('4.123456, 52.123456');
     getInput().dispatchEvent(new Event('blur'));
     fixture.detectChanges();
 
@@ -92,11 +92,11 @@ describe('DestinationSearch', () => {
     component.search.subscribe(searchSpy);
 
     // Act
-    setInputValue('4.895168, 52.370216');
+    setInputValue('4.123456, 52.123456');
     getForm().dispatchEvent(new Event('submit', { cancelable: true }));
 
     // Assert
-    expect(searchSpy).toHaveBeenCalledWith([4.895168, 52.370216]);
+    expect(searchSpy).toHaveBeenCalledWith([4.123456, 52.123456]);
   });
 
   it('should disable the submit button when the disabled input is true', () => {
@@ -114,10 +114,10 @@ describe('DestinationSearch', () => {
     component.search.subscribe(searchSpy);
 
     // Act
-    setInputValue('  4.895168 ,  52.370216  ');
+    setInputValue('  4.123456 ,  52.123456  ');
     getForm().dispatchEvent(new Event('submit', { cancelable: true }));
 
     // Assert
-    expect(searchSpy).toHaveBeenCalledWith([4.895168, 52.370216]);
+    expect(searchSpy).toHaveBeenCalledWith([4.123456, 52.123456]);
   });
 });

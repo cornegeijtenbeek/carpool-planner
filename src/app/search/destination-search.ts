@@ -14,7 +14,7 @@ const COORDINATE_PATTERN = /^\s*-?\d+(?:\.\d+)?\s*,\s*-?\d+(?:\.\d+)?\s*$/;
       <input
         id="destination"
         type="text"
-        placeholder="4.895168, 52.370216"
+        placeholder="4.123456, 52.123456"
         [formField]="searchForm.destination"
       />
       @if (searchForm.destination().touched() && searchForm.destination().invalid()) {

@@ -31,11 +31,11 @@ describe('RoutingService', () => {
     });
 
     // Act
-    await service.getDrivingRoute([4.895168, 52.370216], [4.9, 52.37]);
+    await service.getDrivingRoute([4.123456, 52.123456], [4.9, 52.37]);
 
     // Assert
     expect(fetchSpy).toHaveBeenCalledWith(
-      'https://router.project-osrm.org/route/v1/driving/4.895168,52.370216;4.9,52.37?overview=full&geometries=geojson',
+      'https://router.project-osrm.org/route/v1/driving/4.123456,52.123456;4.9,52.37?overview=full&geometries=geojson',
     );
   });
 
@@ -44,7 +44,7 @@ describe('RoutingService', () => {
     const geometry: LineString = {
       type: 'LineString',
       coordinates: [
-        [4.895168, 52.370216],
+        [4.123456, 52.123456],
         [4.9, 52.37],
       ],
     };
@@ -54,7 +54,7 @@ describe('RoutingService', () => {
     });
 
     // Act
-    const result = await service.getDrivingRoute([4.895168, 52.370216], [4.9, 52.37]);
+    const result = await service.getDrivingRoute([4.123456, 52.123456], [4.9, 52.37]);
 
     // Assert
     expect(result).toEqual(geometry);
@@ -65,7 +65,7 @@ describe('RoutingService', () => {
     fetchSpy.mockResolvedValue({ ok: false, status: 500 });
 
     // Act & Assert
-    await expect(service.getDrivingRoute([4.895168, 52.370216], [4.9, 52.37])).rejects.toThrow(
+    await expect(service.getDrivingRoute([4.123456, 52.123456], [4.9, 52.37])).rejects.toThrow(
       'OSRM request failed: 500',
     );
   });

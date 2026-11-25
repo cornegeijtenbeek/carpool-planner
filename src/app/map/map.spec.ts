@@ -22,7 +22,7 @@ describe('Map', () => {
     type: 'LineString',
     coordinates: [
       [4.9, 52.37],
-      [4.895168, 52.370216],
+      [4.123456, 52.123456],
     ],
   };
 
@@ -79,18 +79,18 @@ describe('Map', () => {
 
   it('should fetch a driving route for every member when searching', async () => {
     // Act
-    await component['onSearch']([4.895168, 52.370216]);
+    await component['onSearch']([4.123456, 52.123456]);
 
     // Assert
     expect(membersService.get).toHaveBeenCalled();
     expect(routingService.getDrivingRoute).toHaveBeenCalledTimes(members.length);
     expect(routingService.getDrivingRoute).toHaveBeenCalledWith(
       members[0].coordinate,
-      [4.895168, 52.370216],
+      [4.123456, 52.123456],
     );
     expect(routingService.getDrivingRoute).toHaveBeenCalledWith(
       members[1].coordinate,
-      [4.895168, 52.370216],
+      [4.123456, 52.123456],
     );
   });
 
@@ -100,7 +100,7 @@ describe('Map', () => {
     const clearSpy = vi.spyOn(routeLayer.getSource()!, 'clear');
 
     // Act
-    await component['onSearch']([4.895168, 52.370216]);
+    await component['onSearch']([4.123456, 52.123456]);
 
     // Assert
     expect(clearSpy).toHaveBeenCalled();
@@ -115,7 +115,7 @@ describe('Map', () => {
     );
 
     // Act
-    const firstSearch = component['onSearch']([4.895168, 52.370216]);
+    const firstSearch = component['onSearch']([4.123456, 52.123456]);
     const secondSearch = component['onSearch']([5, 52]);
     resolveFirstRoute(geometry);
     await Promise.all([firstSearch, secondSearch]);
@@ -126,7 +126,7 @@ describe('Map', () => {
 
   it('should flip isSearching back to false once a search settles', async () => {
     // Act
-    await component['onSearch']([4.895168, 52.370216]);
+    await component['onSearch']([4.123456, 52.123456]);
 
     // Assert
     expect(component['isSearching']()).toBe(false);
@@ -137,7 +137,7 @@ describe('Map', () => {
     routingService.getDrivingRoute.mockRejectedValue(new Error('OSRM request failed: 500'));
 
     // Act
-    await component['onSearch']([4.895168, 52.370216]);
+    await component['onSearch']([4.123456, 52.123456]);
 
     // Assert
     expect(component['isSearching']()).toBe(false);
@@ -150,7 +150,7 @@ describe('Map', () => {
     membersService.get.mockRejectedValueOnce(membersError);
 
     // Act
-    await component['onSearch']([4.895168, 52.370216]);
+    await component['onSearch']([4.123456, 52.123456]);
 
     // Assert
     expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to search for routes', membersError);

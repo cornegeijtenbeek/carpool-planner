@@ -6,14 +6,14 @@ describe('RouteLayer', () => {
   const member: Member = {
     id: '1',
     name: 'Alice',
-    coordinate: [4.895168, 52.370216],
+    coordinate: [4.123456, 52.123456],
     color: '#ff0000',
   };
 
   const geometry: LineString = {
     type: 'LineString',
     coordinates: [
-      [4.895168, 52.370216],
+      [4.123456, 52.123456],
       [4.9, 52.37],
     ],
   };
