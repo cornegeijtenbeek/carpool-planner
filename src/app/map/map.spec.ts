@@ -84,12 +84,14 @@ describe('Map', () => {
     // Assert
     expect(membersService.get).toHaveBeenCalled();
     expect(routingService.getDrivingRoute).toHaveBeenCalledTimes(members.length);
-    expect(routingService.getDrivingRoute).toHaveBeenCalledWith(members[0].coordinate, [
-      4.895168, 52.370216,
-    ]);
-    expect(routingService.getDrivingRoute).toHaveBeenCalledWith(members[1].coordinate, [
-      4.895168, 52.370216,
-    ]);
+    expect(routingService.getDrivingRoute).toHaveBeenCalledWith(
+      members[0].coordinate,
+      [4.895168, 52.370216],
+    );
+    expect(routingService.getDrivingRoute).toHaveBeenCalledWith(
+      members[1].coordinate,
+      [4.895168, 52.370216],
+    );
   });
 
   it('should clear previous routes and add an end marker when searching', async () => {
@@ -132,12 +134,25 @@ describe('Map', () => {
 
   it('should flip isSearching back to false even when a search fails', async () => {
     // Arrange
-    routingService.getDrivingRoute.mockRejectedValueOnce(new Error('OSRM request failed: 500'));
+    routingService.getDrivingRoute.mockRejectedValue(new Error('OSRM request failed: 500'));
 
     // Act
-    await component['onSearch']([4.895168, 52.370216]).catch(() => {});
+    await component['onSearch']([4.895168, 52.370216]);
 
     // Assert
     expect(component['isSearching']()).toBe(false);
+  });
+
+  it('should log an error when fetching members fails', async () => {
+    // Arrange
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const membersError = new Error('Members request failed');
+    membersService.get.mockRejectedValueOnce(membersError);
+
+    // Act
+    await component['onSearch']([4.895168, 52.370216]);
+
+    // Assert
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to search for routes', membersError);
   });
 });
