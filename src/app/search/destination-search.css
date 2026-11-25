@@ -45,7 +45,13 @@
   cursor: pointer;
 }
 
-.destination-search button:hover {
+.destination-search button:disabled {
+  opacity: .5;
+  border-color: #b5b5b5;
+  cursor: not-allowed;
+}
+
+.destination-search button:hover:not(:disabled) {
   background-color: #f0f0f0;
 }
 

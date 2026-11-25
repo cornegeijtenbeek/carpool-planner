@@ -104,4 +104,40 @@ describe('Map', () => {
     expect(clearSpy).toHaveBeenCalled();
     expect(routeLayer.getSource()?.getFeatures().length).toBeGreaterThan(0);
   });
+
+  it('should ignore a new search while one is already in flight', async () => {
+    // Arrange
+    let resolveFirstRoute!: (value: LineString) => void;
+    routingService.getDrivingRoute.mockReturnValueOnce(
+      new Promise<LineString>((resolve) => (resolveFirstRoute = resolve)),
+    );
+
+    // Act
+    const firstSearch = component['onSearch']([4.895168, 52.370216]);
+    const secondSearch = component['onSearch']([5, 52]);
+    resolveFirstRoute(geometry);
+    await Promise.all([firstSearch, secondSearch]);
+
+    // Assert
+    expect(membersService.get).toHaveBeenCalledTimes(1);
+  });
+
+  it('should flip isSearching back to false once a search settles', async () => {
+    // Act
+    await component['onSearch']([4.895168, 52.370216]);
+
+    // Assert
+    expect(component['isSearching']()).toBe(false);
+  });
+
+  it('should flip isSearching back to false even when a search fails', async () => {
+    // Arrange
+    routingService.getDrivingRoute.mockRejectedValueOnce(new Error('OSRM request failed: 500'));
+
+    // Act
+    await component['onSearch']([4.895168, 52.370216]).catch(() => {});
+
+    // Assert
+    expect(component['isSearching']()).toBe(false);
+  });
 });

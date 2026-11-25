@@ -1,4 +1,4 @@
-import { Component, effect, inject, type OnInit } from '@angular/core';
+import { Component, effect, inject, signal, type OnInit } from '@angular/core';
 import OlMap from 'ol/Map';
 import { transformExtent } from 'ol/proj';
 import View from 'ol/View';
@@ -23,7 +23,7 @@ const netherlands = [3.31497, 50.803721, 7.092053, 53.510403];
   styleUrl: './map.css',
   template: `
     <div id="map" class="map-container"></div>
-    <app-destination-search (search)="onSearch($event)" />
+    <app-destination-search (search)="onSearch($event)" [disabled]="isSearching()" />
     <app-theme-toggle />
   `,
 })
@@ -34,6 +34,8 @@ export class Map implements OnInit {
   private readonly lightGrayTileLayer = new LightGrayTileLayer();
   private readonly darkGrayTileLayer = new DarkGrayTileLayer();
   private readonly routeLayer = new RouteLayer();
+
+  protected readonly isSearching = signal(false);
 
   private map!: OlMap;
 
@@ -58,12 +60,22 @@ export class Map implements OnInit {
   }
 
   protected async onSearch(destination: Coordinate) {
-    this.routeLayer.getSource()?.clear();
-    this.routeLayer.getSource()?.addFeature(createEndMarker(destination));
+    if (this.isSearching()) {
+      return;
+    }
 
-    const members = await this.memberService.get();
+    this.isSearching.set(true);
 
-    await Promise.all(members.map((member) => this.addRouteForMember(member, destination)));
+    try {
+      this.routeLayer.getSource()?.clear();
+      this.routeLayer.getSource()?.addFeature(createEndMarker(destination));
+
+      const members = await this.memberService.get();
+
+      await Promise.all(members.map((member) => this.addRouteForMember(member, destination)));
+    } finally {
+      this.isSearching.set(false);
+    }
   }
 
   private async addRouteForMember(member: Member, destination: Coordinate) {

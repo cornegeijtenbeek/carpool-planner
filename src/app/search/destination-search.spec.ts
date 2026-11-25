@@ -27,6 +27,10 @@ describe('DestinationSearch', () => {
     return fixture.nativeElement.querySelector('.destination-search__error');
   }
 
+  function getSubmitButton(): HTMLButtonElement {
+    return fixture.nativeElement.querySelector('button[type="submit"]');
+  }
+
   function setInputValue(value: string) {
     const input = getInput();
     input.value = value;
@@ -93,6 +97,15 @@ describe('DestinationSearch', () => {
 
     // Assert
     expect(searchSpy).toHaveBeenCalledWith([4.895168, 52.370216]);
+  });
+
+  it('should disable the submit button when the disabled input is true', () => {
+    // Act
+    fixture.componentRef.setInput('disabled', true);
+    fixture.detectChanges();
+
+    // Assert
+    expect(getSubmitButton().disabled).toBe(true);
   });
 
   it('should trim whitespace around each coordinate value', () => {

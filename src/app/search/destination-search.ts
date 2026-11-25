@@ -1,4 +1,4 @@
-import { Component, output, signal } from '@angular/core';
+import { Component, input, output, signal } from '@angular/core';
 import { FormField, FormRoot, form, pattern, required } from '@angular/forms/signals';
 import type { Coordinate } from 'ol/coordinate';
 
@@ -22,11 +22,12 @@ const COORDINATE_PATTERN = /^\s*-?\d+(?:\.\d+)?\s*,\s*-?\d+(?:\.\d+)?\s*$/;
           Enter coordinates as "longitude, latitude"
         </p>
       }
-      <button type="submit">Search</button>
+      <button type="submit" [disabled]="disabled()">Search</button>
     </form>
   `,
 })
 export class DestinationSearch {
+  readonly disabled = input(false);
   readonly search = output<Coordinate>();
 
   private readonly model = signal({ destination: '' });
