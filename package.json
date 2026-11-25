@@ -9,7 +9,8 @@
     "test": "ng test",
     "serve": "json-server db.json",
     "lint": "ng lint",
-    "prettier:write": "prettier --write ."
+    "prettier:write": "prettier --write .",
+    "typecheck": "ngc -p tsconfig.app.json --noEmit"
   },
   "private": true,
   "packageManager": "npm@11.19.1",
