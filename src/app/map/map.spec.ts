@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import type { LineString } from 'geojson';
 import type { Member } from '../members/member.interface';
 import { MembersService } from '../members/members.service';
-import { RoutingService } from '../routes/routing.service';
+import { RoutesService } from '../routes/routes.service';
 import { ThemeService } from '../theme/theme.service';
 import { Map } from './map';
 
@@ -10,7 +10,7 @@ describe('Map', () => {
   let component: Map;
   let fixture: ComponentFixture<Map>;
   let membersService: { get: ReturnType<typeof vi.fn> };
-  let routingService: { getDrivingRoute: ReturnType<typeof vi.fn> };
+  let routesService: { getFastestRoutes: ReturnType<typeof vi.fn> };
   let themeService: ThemeService;
 
   const members: Member[] = [
@@ -25,6 +25,7 @@ describe('Map', () => {
       [4.123456, 52.123456],
     ],
   };
+  const route = { geometry, distance: 1000, duration: 60 };
 
   beforeEach(async () => {
     vi.stubGlobal(
@@ -37,13 +38,13 @@ describe('Map', () => {
     );
 
     membersService = { get: vi.fn().mockResolvedValue(members) };
-    routingService = { getDrivingRoute: vi.fn().mockResolvedValue(geometry) };
+    routesService = { getFastestRoutes: vi.fn().mockResolvedValue(route) };
 
     await TestBed.configureTestingModule({
       imports: [Map],
       providers: [
         { provide: MembersService, useValue: membersService },
-        { provide: RoutingService, useValue: routingService },
+        { provide: RoutesService, useValue: routesService },
       ],
     }).compileComponents();
 
@@ -83,12 +84,12 @@ describe('Map', () => {
 
     // Assert
     expect(membersService.get).toHaveBeenCalled();
-    expect(routingService.getDrivingRoute).toHaveBeenCalledTimes(members.length);
-    expect(routingService.getDrivingRoute).toHaveBeenCalledWith(
+    expect(routesService.getFastestRoutes).toHaveBeenCalledTimes(members.length);
+    expect(routesService.getFastestRoutes).toHaveBeenCalledWith(
       members[0].coordinate,
       [4.123456, 52.123456],
     );
-    expect(routingService.getDrivingRoute).toHaveBeenCalledWith(
+    expect(routesService.getFastestRoutes).toHaveBeenCalledWith(
       members[1].coordinate,
       [4.123456, 52.123456],
     );
@@ -109,15 +110,15 @@ describe('Map', () => {
 
   it('should ignore a new search while one is already in flight', async () => {
     // Arrange
-    let resolveFirstRoute!: (value: LineString) => void;
-    routingService.getDrivingRoute.mockReturnValueOnce(
-      new Promise<LineString>((resolve) => (resolveFirstRoute = resolve)),
+    let resolveFirstRoute!: (value: typeof route) => void;
+    routesService.getFastestRoutes.mockReturnValueOnce(
+      new Promise<typeof route>((resolve) => (resolveFirstRoute = resolve)),
     );
 
     // Act
     const firstSearch = component['onSearch']([4.123456, 52.123456]);
     const secondSearch = component['onSearch']([5, 52]);
-    resolveFirstRoute(geometry);
+    resolveFirstRoute(route);
     await Promise.all([firstSearch, secondSearch]);
 
     // Assert
@@ -134,7 +135,7 @@ describe('Map', () => {
 
   it('should flip isSearching back to false even when a search fails', async () => {
     // Arrange
-    routingService.getDrivingRoute.mockRejectedValue(new Error('OSRM request failed: 500'));
+    routesService.getFastestRoutes.mockRejectedValue(new Error('OSRM request failed: 500'));
 
     // Act
     await component['onSearch']([4.123456, 52.123456]);

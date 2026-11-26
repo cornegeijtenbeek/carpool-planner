@@ -3,7 +3,7 @@ import OlMap from 'ol/Map';
 import { transformExtent } from 'ol/proj';
 import View from 'ol/View';
 import { defaults as defaultControls } from 'ol/control';
-import { RoutingService } from '../routes/routing.service';
+import { RoutesService } from '../routes/routes.service';
 import { MembersService } from '../members/members.service';
 import type { Member } from '../members/member.interface';
 import { RouteLayer } from '../routes/route-layer';
@@ -29,7 +29,7 @@ const netherlands = [3.31497, 50.803721, 7.092053, 53.510403];
 })
 export class Map implements OnInit {
   private readonly memberService = inject(MembersService);
-  private readonly routingService = inject(RoutingService);
+  private readonly routesService = inject(RoutesService);
   private readonly themeService = inject(ThemeService);
   private readonly lightGrayTileLayer = new LightGrayTileLayer();
   private readonly darkGrayTileLayer = new DarkGrayTileLayer();
@@ -72,7 +72,7 @@ export class Map implements OnInit {
 
       const members = await this.memberService.get();
 
-      await Promise.all(members.map((member) => this.addRouteForMember(member, destination)));
+      await Promise.all(members.map((member) => this.addRoutesForMember(member, destination)));
     } catch (error) {
       console.error('Failed to search for routes', error);
     } finally {
@@ -80,8 +80,8 @@ export class Map implements OnInit {
     }
   }
 
-  private async addRouteForMember(member: Member, destination: Coordinate) {
-    const result = await this.routingService.getDrivingRoute(member.coordinate, destination);
+  private async addRoutesForMember(member: Member, destination: Coordinate) {
+    const result = await this.routesService.getFastestRoutes(member.coordinate, destination);
 
     this.routeLayer.add(member, result);
   }

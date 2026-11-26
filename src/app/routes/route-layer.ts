@@ -1,40 +1,21 @@
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import type { Member } from '../members/member.interface';
-import GeoJSON from 'ol/format/GeoJSON';
 import { asArray } from 'ol/color';
 import { Stroke, Style } from 'ol/style';
 import { createStartMarker } from './markers';
 import Feature from 'ol/Feature';
-import type { LineString } from 'geojson';
 
 export class RouteLayer extends VectorLayer {
   constructor() {
     super({ source: new VectorSource() });
   }
 
-  public async add({ name, coordinate, color }: Member, geometry: LineString) {
-    this.getSource()?.addFeatures([
-      ...this.createRoutes(geometry, color),
-      createStartMarker(coordinate, color, name),
-    ]);
-  }
+  public add({ name, coordinate, color }: Member, features: Feature[]) {
+    this.addStyles(features, color);
 
-  private createRoutes(geometry: LineString, color: string) {
-    const result = this.readFeature(geometry);
-
-    this.addStyles(result, color);
-
-    return result;
-  }
-
-  private readFeature(geometry: LineString) {
-    const result = new GeoJSON().readFeature(geometry, {
-      dataProjection: 'EPSG:4326',
-      featureProjection: 'EPSG:3857',
-    });
-
-    return Array.isArray(result) ? result : [result];
+    this.getSource()?.addFeatures(features);
+    this.getSource()?.addFeature(createStartMarker(coordinate, color, name));
   }
 
   private addStyles(feature: Feature[], color: string) {
